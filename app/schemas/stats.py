@@ -18,6 +18,8 @@ class AdminStats(BaseModel):
     vacancies_by_status: dict[str, int]
     vacancies_total: int
     applications_total: int
+    users_by_role: dict[str, int]
+    users_total: int
     top_categories: list[CategoryStat]
     applications_by_day: list[DayStat]
 

@@ -80,6 +80,8 @@ flowchart LR
 | Администратор | Отклонить вакансию с комментарием | `POST /admin/vacancies/{id}/reject` |
 | Администратор | Вести справочник категорий | `POST /categories`, `PATCH /categories/{id}`, `DELETE /categories/{id}` |
 | Администратор | Посмотреть статистику | `GET /admin/stats` |
+| Администратор | Найти пользователя, заблокировать или разблокировать его | `GET /admin/users`, `PATCH /admin/users/{id}/active` |
+| Администратор | Посмотреть все отклики и скачать резюме | `GET /admin/applications`, `GET /applications/{id}/resume` |
 | Мониторинг | Проверить сервис и БД | `GET /health` |
 
 ## Правила доступа

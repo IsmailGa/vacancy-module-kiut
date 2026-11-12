@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.applications import Application
 from app.models.categories import Category
+from app.models.users import User, UserRole
 from app.models.vacancies import Vacancy, VacancyStatus
 from app.schemas.stats import AdminStats, CategoryStat, DayStat
 
@@ -32,6 +33,10 @@ async def get_admin_stats(db: AsyncSession) -> AdminStats:
 
     applications_total = await db.scalar(select(func.count()).select_from(Application)) or 0
 
+    role_rows = await db.execute(select(User.role, func.count()).group_by(User.role))
+    by_role = {role.value: 0 for role in UserRole}
+    by_role.update({role.value: count for role, count in role_rows})
+
     applications_count = func.count(Application.id)
     top_rows = await db.execute(
         select(Category.id, Category.name, applications_count)
@@ -47,6 +52,8 @@ async def get_admin_stats(db: AsyncSession) -> AdminStats:
         vacancies_by_status=by_status,
         vacancies_total=sum(by_status.values()),
         applications_total=applications_total,
+        users_by_role=by_role,
+        users_total=sum(by_role.values()),
         top_categories=[
             CategoryStat(category_id=cid, name=name, applications=count)
             for cid, name, count in top_rows

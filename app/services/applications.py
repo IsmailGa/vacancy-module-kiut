@@ -14,7 +14,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.core.config import settings
 from app.core.exceptions import AppError, ConflictError, InvalidStateError, NotFoundError
 from app.models.applications import Application, ApplicationStatus
-from app.models.users import User
+from app.models.users import User, UserRole
 from app.models.vacancies import Vacancy, VacancyStatus
 from app.schemas.vacancies import today_utc
 from app.services import vacancies as vacancy_service
@@ -187,11 +187,12 @@ async def change_status(
 
 
 async def get_resume(db: AsyncSession, application_id: int, user: User) -> tuple[str, str]:
-    """Путь к PDF и имя для скачивания. Доступ: студент-автор или владелец вакансии."""
+    """Путь к PDF и имя для скачивания. Доступ: студент-автор, владелец вакансии или админ."""
     application = await _get_with_vacancy(db, application_id)
     is_author = application.student_id == user.id
     is_vacancy_owner = application.vacancy.employer_id == user.id
-    if not (is_author or is_vacancy_owner):
+    is_admin = user.role is UserRole.ADMIN
+    if not (is_author or is_vacancy_owner or is_admin):
         raise NotFoundError(*_NOT_FOUND)
     if application.resume_path is None:
         raise NotFoundError("К отклику не приложено резюме", "resume_not_found")
